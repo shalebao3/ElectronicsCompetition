@@ -1,0 +1,64 @@
+# --- IDE 编译输出文件 ---
+*.o
+*.d
+*.crf
+*.dep
+*.htm
+*.lnp
+*.sct
+*.lst
+*.map
+*.axf
+*.elf
+*.hex
+*.bin
+*.out
+*.i
+
+# --- STM32CubeIDE / Eclipse 相关 ---
+.settings/
+Debug/
+Release/
+Bin/
+*.launch
+.gdb_history
+
+# --- Keil MDK 相关 ---
+# 忽略编译中间文件夹
+Objects/
+Listings/
+# 忽略用户配置和状态文件
+*.uvgui.*
+*.uvguix.*
+*.uvopt
+*.uvoptx
+*.bak
+*.dep
+*.JLink*.log
+*.scvd
+JLinkLog.txt
+*.history
+
+# --- IAR 相关 ---
+Debug/
+Release/
+*.pbi
+*.pbd
+*.browse
+*.pbd.browse
+*.vbp
+*.settings
+*.dnx
+*.dep
+*.custom_argvars
+
+# --- 系统及日志 ---
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+
+# --- 保护配置文件 (可选) ---
+# 如果你想保留工程文件（.project, .cproject, .ioc），请确保不要忽略它们
+# 但如果你想忽略本地的用户视角配置，可以取消下面注释
+# .mxproject
