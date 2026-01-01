@@ -1,3 +1,4 @@
+-- Active: 1752068009467@@127.0.0.1@3306@youlai_boot
 /*
  * FreeRTOS V202212.01
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
@@ -76,18 +77,18 @@ configKERNEL_INTERRUPT_PRIORITY setting.  Here 15 corresponds to the lowest
 NVIC value of 255. */
 #define configLIBRARY_KERNEL_INTERRUPT_PRIORITY 15
 
-/* 添加必须的宏 */
+/* 添加必须的宝 */
 #define xPortPendSVHandler PendSV_Handler
 #define vPortSVCHandler SVC_Handler
 #define INCLUDE_xTaskGetSchedulerState 1
 
-/* 开启动态分配 */
+/* 开坯动思分酝 */
 #define configSUPPORT_DYNAMIC_ALLOCATION 1
 
-/* 开启时间片调度 */
+/* 开坯时间片调度 */
 #define configUSE_TIME_SLICING 1
 
-/* 中断嵌套行为配置 */
+/* 中断嵌套行为酝置 */
 #ifdef __NVIC_PRIO_BITS
 #define configPRIO_BITS __NVIC_PRIO_BITS
 #else
@@ -95,7 +96,7 @@ NVIC value of 255. */
 #endif
 
 #define configLIBRARY_LOWEST_INTERRUPT_PRIORITY 15 /* 中断最低优先级 */
-#define configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY 5 /* FreeRTOS可管理的最高中断优先级 */
+#define configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY 5 /* FreeRTOS坯管睆的最高中断优先级 */
 #define configKERNEL_INTERRUPT_PRIORITY (configLIBRARY_LOWEST_INTERRUPT_PRIORITY << (8 - configPRIO_BITS))
 #define configMAX_SYSCALL_INTERRUPT_PRIORITY (configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY << (8 - configPRIO_BITS))
 #define configMAX_API_CALL_INTERRUPT_PRIORITY configMAX_SYSCALL_INTERRUPT_PRIORITY
