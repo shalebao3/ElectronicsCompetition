@@ -3,21 +3,21 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceFolder}/**",            // 递归搜索当前工程下所有文件夹
-                "D:\\program\\keil5\\packs\\ARM\\CMSIS\\5.9.0\\CMSIS\\Core\\Include", // CMSIS路径
-                "D:\\program\\keil5\\packs\\Keil\\STM32F1xx_DFP\\2.4.0\\Device\\Include" // 芯片库路径
+                "${workspaceFolder}/**",            
+                "D:\\program\\keil5\\packs\\ARM\\CMSIS\\5.9.0\\CMSIS\\Core\\Include", 
+                "D:\\program\\keil5\\packs\\Keil\\STM32F1xx_DFP\\2.4.0\\Device\\Include" 
             ],
             "defines": [
                 "_DEBUG",
                 "UNICODE",
                 "_UNICODE",
-                "USE_STDPERIPH_DRIVER",             // 使用标准外设库
-                "STM32F10X_MD"                      // 芯片容量定义（中容量设备）
+                "USE_STDPERIPH_DRIVER",
+                "STM32F10X_MD"                      
             ],
-            "compilerPath": "D:\\program\\keil5\\core\\ARM\\ARMCC\\Bin\\armcc.exe", // 编译器路径
+            "compilerPath": "D:\\program\\keil5\\core\\ARM\\ARMCC\\Bin\\armcc.exe",
             "cStandard": "c11",
             "cppStandard": "c++17",
-            "intelliSenseMode": "windows-gcc-arm",   // 关键：设置为ARM模式
+            "intelliSenseMode": "windows-gcc-arm",
             "browse": {
                 "path": [
                     "${workspaceFolder}"

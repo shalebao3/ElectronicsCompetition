@@ -7,9 +7,9 @@
 void Dri_TIM4_Init()
 {
 /* 1.  开启时钟*/
-    /* 1.1 定时器4的时钟 */
+    /* 1.1 开启定时器4的时钟 */
     RCC->APB1ENR |= RCC_APB1ENR_TIM4EN;
-    /* 1.2 GPIO的时钟 PB */
+    /* 1.2 开启GPIOB的时钟 */
     RCC->APB2ENR |= RCC_APB2ENR_IOPBEN;
 
 /* 2. 设置GPIO的复用推挽输出 PB8 CNF=10 MODE=11*/
