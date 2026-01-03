@@ -12,6 +12,8 @@
                 "e:\\DEV\\work\\embed\\ElectronicsCompetition\\project\\BalancingCar\\Mid\\FreeRTOS",
                 "e:\\DEV\\work\\embed\\ElectronicsCompetition\\project\\BalancingCar\\Mid\\FreeRTOS\\include",
                 "e:\\DEV\\work\\embed\\ElectronicsCompetition\\project\\BalancingCar\\Mid\\FreeRTOS\\Portable",
+                "D:\\program\\keil5\\core\\ARM\\ARMCC\\include",
+                "D:\\program\\keil5\\core\\ARM\\ARMCC\\include\\rw",
                 "e:\\DEV\\work\\embed\\ElectronicsCompetition\\project\\BalancingCar\\Mid\\FreeRTOS\\Source"
             ],
             "defines": [
