@@ -57,6 +57,7 @@ Release/
 Thumbs.db
 *.log
 *.tmp
+*.lock
 
 # --- 保护配置文件 (可选) ---
 # 如果你想保留工程文件（.project, .cproject, .ioc），请确保不要忽略它们
