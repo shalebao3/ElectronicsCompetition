@@ -435,9 +435,23 @@
         </Group>
         <Group>
           <GroupName>Driver</GroupName>
+          <Files>
+            <File>
+              <FileName>DRIVER_TIM.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Driver\DRIVER_TIM.c</FilePath>
+            </File>
+          </Files>
         </Group>
         <Group>
           <GroupName>Interface</GroupName>
+          <Files>
+            <File>
+              <FileName>INTERFACE_TB6612.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Interface\INTERFACE_TB6612.c</FilePath>
+            </File>
+          </Files>
         </Group>
         <Group>
           <GroupName>Mid/FreeRTOS</GroupName>
