@@ -6,12 +6,13 @@
  */
 void Dri_TIM4_Init()
 {
-/* 1.  开启时钟*/
+/* CLOCK */
     /* 1.1 开启定时器4的时钟 */
     RCC->APB1ENR |= RCC_APB1ENR_TIM4EN;
     /* 1.2 开启GPIOB的时钟 */
     RCC->APB2ENR |= RCC_APB2ENR_IOPBEN;
 
+/* Pinmux */
 /* 2. 设置GPIO的复用推挽输出 PB8 CNF=10 MODE=11*/
     GPIOB->CRH |= GPIO_CRH_MODE8;
     GPIOB->CRH |= GPIO_CRH_CNF8_1;
@@ -21,6 +22,7 @@ void Dri_TIM4_Init()
     GPIOB->CRH |= GPIO_CRH_CNF9_1;
     GPIOB->CRH &= ~GPIO_CRH_CNF9_0;
 
+/* CoreConfig */
 /* 3. 定时器配置 */
     /* pwm频率=10k； pwm频率= 72M(时钟频率) /(PSC+1)×(ARR+1) */
     /* 3.1 预分频器的配置 0 不分频 */
@@ -31,6 +33,7 @@ void Dri_TIM4_Init()
     //  &= ~ &= ~ (位清除操作): 这一行代码通过“与非”逻辑将 DIR 位清零。 这意味着计数器将以向上计数的方式工作。
     TIM4->CR1 &= ~TIM_CR1_DIR;
 
+/* Channel/Feature */
 /* 4. pwm CH3相关配置 */
     /* 4.1 配置通道3的占空比 */
     TIM4->CCR3 = 0;
@@ -59,7 +62,11 @@ void Dri_TIM4_Init()
     /* 5.5 设置通道的极性 0=高电平有效  1=低电平有效 */
     TIM4->CCER &= ~TIM_CCER_CC4P;
 
-    
+/* Link */
+/* IRQ */
+/* DMA */
+
+/* Start */ 
 /* 6 使能定时器计数器 */
     TIM4->CR1 |= TIM_CR1_CEN;
 }
