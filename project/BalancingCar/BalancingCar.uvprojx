@@ -451,6 +451,11 @@
               <FileType>1</FileType>
               <FilePath>.\Interface\INTERFACE_TB6612.c</FilePath>
             </File>
+            <File>
+              <FileName>INTERFACE_Encoder.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Interface\INTERFACE_Encoder.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
