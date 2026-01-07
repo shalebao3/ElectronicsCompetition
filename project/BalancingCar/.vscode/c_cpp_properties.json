@@ -1,6 +1,31 @@
 {
     "configurations": [
         {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "D:\\program\\keil5\\packs\\ARM\\CMSIS\\5.9.0\\CMSIS\\Core\\Include",
+                "D:\\program\\keil5\\packs\\Keil\\STM32F1xx_DFP\\2.4.0\\Device\\Include"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE",
+                "USE_STDPERIPH_DRIVER",
+                "STM32F10X_MD"
+            ],
+            "compilerPath": "D:\\program\\keil5\\core\\ARM\\ARMCC\\Bin\\armcc.exe",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "windows-gcc-arm",
+            "browse": {
+                "path": [
+                    "${workspaceFolder}"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            }
+        },
+        {
             "name": "Target 1",
             "includePath": [
                 "e:\\DEV\\work\\embed\\ElectronicsCompetition\\project\\BalancingCar\\Start",
