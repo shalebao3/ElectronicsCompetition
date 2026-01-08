@@ -75,6 +75,7 @@ uint8_t Driver_I2C_SendAddr(uint8_t addr)
     I2C2->DR = addr;
 
     uint16_t timeout = 0xffff;
+    // 硬件I2C,ACK由从机自动发送，并且I2C_SR1_ADDR标志位确认
     while (((I2C2->SR1 & I2C_SR1_ADDR) == 0) && timeout)
     {
         timeout--;
