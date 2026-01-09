@@ -69,6 +69,10 @@
 
 void Int_MPU6050_Init(void);
 
+void Int_MPU6050_Get_Gryo(short *gx, short *gy, short *gz);
+
+void Int_MPU6050_Get_Accel(short *ax, short *ay, short *az);
+
 #endif
 
 
