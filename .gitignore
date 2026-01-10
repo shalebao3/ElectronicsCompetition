@@ -63,3 +63,4 @@ Thumbs.db
 # 如果你想保留工程文件（.project, .cproject, .ioc），请确保不要忽略它们
 # 但如果你想忽略本地的用户视角配置，可以取消下面注释
 # .mxproject
+project/BalancingCar/.vscode/uv4.log.lock

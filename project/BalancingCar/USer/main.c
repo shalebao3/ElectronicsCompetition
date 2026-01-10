@@ -5,6 +5,7 @@
 #include "INTERFACE_Encoder.h"
 #include "INTERFACE_MPU6050.h"
 #include "Driver_USART.h"
+#include "App_car.h"
 
 
 void for_delay_ms(uint32_t ms)
@@ -41,14 +42,15 @@ int main(void)
 		// =============测试MPU6050================
 		Int_MPU6050_Get_Gryo(&gx, &gy, &gz);
 		Int_MPU6050_Get_Accel(&ax, &ay, &az);
-		printf("gx=%d\r\n", gx);
-		printf("gy=%d\r\n", gy);
-		printf("gz=%d\r\n", gz);
-		printf("ax=%d\r\n", ax);
-		printf("ay=%d\r\n", ay);
-		printf("az=%d\r\n", az);
-		for_delay_ms(5000);
-	}
+		// 这种格式最容易被 VOFA+ 识别为 6 个独立的通道
+		// 只要数字和逗号，结尾必须换行
+		// printf("%d,%d,%d,%d,%d,%d\n", gx, gy, gz, ax, ay, az);
+		// for_delay_ms(20);
+
+		// =============测试小车角度================
+		App_Car_GetAngle();
+		for_delay_ms(20);
+	}	
 	
 }
 
