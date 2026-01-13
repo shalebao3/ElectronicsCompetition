@@ -3,9 +3,7 @@
 
 #include "stm32f10x.h"
 
-void Dri_TIM4_Init(void);
-
-void Dri_TIM_Encoder(void);
+void Dri_TIM1_Init(void);
 
 
 #endif

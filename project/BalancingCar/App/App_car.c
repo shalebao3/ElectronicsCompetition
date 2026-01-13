@@ -33,6 +33,9 @@ void App_Car_GetAngle(void)
     Com_Filter_Kalman(car_angle, car_gyro);
 
 
-    printf("car_angle: %.2f\r\n", angle);
-    printf("car_gyro: %.2f\r\n", car_gyro);
+    //printf("car_angle: %.2f,car_gyro: %.2f\n", angle,car_gyro);
+		// 注意冒号后的空格，以及逗号后的空格
+		//printf("angle: %.2f, gyro: %.2f\n", angle, car_gyro);
+	  // 没有任何文字，只有：数字1,数字2\n
+    printf("%.2f,%.2f\n", angle, car_gyro);
 }

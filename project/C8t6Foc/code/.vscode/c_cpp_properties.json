@@ -3,16 +3,21 @@
         {
             "name": "Target 1",
             "includePath": [
-                "e:\\DEV\\work\\embed\\ElectronicsCompetition\\project\\C8t6Foc\\App",
-                "e:\\DEV\\work\\embed\\ElectronicsCompetition\\project\\C8t6Foc\\Common",
-                "e:\\DEV\\work\\embed\\ElectronicsCompetition\\project\\C8t6Foc\\Driver",
-                "e:\\DEV\\work\\embed\\ElectronicsCompetition\\project\\C8t6Foc\\Interface",
-                "e:\\DEV\\work\\embed\\ElectronicsCompetition\\project\\C8t6Foc\\Start",
-                "e:\\DEV\\work\\embed\\ElectronicsCompetition\\project\\C8t6Foc\\User",
+                "e:\\DEV\\work\\embed\\ElectronicsCompetition\\project\\C8t6Foc\\code\\App",
+                "e:\\DEV\\work\\embed\\ElectronicsCompetition\\project\\C8t6Foc\\code\\Common",
+                "e:\\DEV\\work\\embed\\ElectronicsCompetition\\project\\C8t6Foc\\code\\Driver",
+                "e:\\DEV\\work\\embed\\ElectronicsCompetition\\project\\C8t6Foc\\code\\Interface",
+                "e:\\DEV\\work\\embed\\ElectronicsCompetition\\project\\C8t6Foc\\code\\Start",
+                "e:\\DEV\\work\\embed\\ElectronicsCompetition\\project\\C8t6Foc\\code\\User",
+                "e:\\DEV\\work\\embed\\ElectronicsCompetition\\project\\C8t6Foc\\code\\Mid\\FreeRTOS",
+                "e:\\DEV\\work\\embed\\ElectronicsCompetition\\project\\C8t6Foc\\code\\Mid\\FreeRTOS\\include",
+                "e:\\DEV\\work\\embed\\ElectronicsCompetition\\project\\C8t6Foc\\code\\Mid\\FreeRTOS\\Portable",
                 "D:\\program\\keil5\\core\\ARM\\ARMCC\\include",
-                "D:\\program\\keil5\\core\\ARM\\ARMCC\\include\\rw"
+                "D:\\program\\keil5\\core\\ARM\\ARMCC\\include\\rw",
+                "e:\\DEV\\work\\embed\\ElectronicsCompetition\\project\\C8t6Foc\\code\\Mid\\FreeRTOS\\Source"
             ],
             "defines": [
+                "STM32F10X_MD",
                 "__CC_ARM",
                 "__arm__",
                 "__align(x)=",

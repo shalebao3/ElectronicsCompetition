@@ -465,6 +465,11 @@
               <FileType>1</FileType>
               <FilePath>.\Driver\DRIVER_I2C.c</FilePath>
             </File>
+            <File>
+              <FileName>DRIVER_ADC.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Driver\DRIVER_ADC.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

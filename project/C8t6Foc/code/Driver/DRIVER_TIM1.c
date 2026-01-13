@@ -1,179 +1,147 @@
 #include "DRIVER_TIM1.h"
+#include "stm32f10x.h"
 
-/**
- * @description: TIM4初始化，pwm模式
- * @return {*}
- */
-void Dri_TIM4_Init(void)
+
+
+// ====== 可改参数 ======
+#define TIM1_CLK_HZ     72000000u   // TIM1 时钟（常见 72MHz）
+#define PWM_FREQ_HZ     20000u      // PWM 频率
+#define DEADTIME_NS     500u        // 死区（ns）
+#define DUTY_PERMILLE   500u        // 初始占空比（千分比 0~1000）
+
+static inline uint16_t clamp_u16(uint16_t v, uint16_t lo, uint16_t hi)
 {
-/* CLOCK */
-    /* 1.1 开启定时器4的时钟 */
-    RCC->APB1ENR |= RCC_APB1ENR_TIM4EN;
-    /* 1.2 开启GPIOB的时钟 */
-    RCC->APB2ENR |= RCC_APB2ENR_IOPBEN;
-
-/* Pinmux */
-/* 2. 设置GPIO的复用推挽输出 PB8 CNF=10 MODE=11*/
-    GPIOB->CRH |= GPIO_CRH_MODE8;
-    GPIOB->CRH |= GPIO_CRH_CNF8_1;
-    GPIOB->CRH &= ~GPIO_CRH_CNF8_0;
-    /* 2. 设置GPIO的复用推挽输出 PB9 CNF=10 MODE=11*/
-    GPIOB->CRH |= GPIO_CRH_MODE9;
-    GPIOB->CRH |= GPIO_CRH_CNF9_1;
-    GPIOB->CRH &= ~GPIO_CRH_CNF9_0;
-
-/* CoreConfig */
-/* 3. 定时器配置 */
-    /* pwm频率=10k； pwm频率= 72M(时钟频率) /(PSC+1)×(ARR+1) */
-    /* 3.1 预分频器的配置 0 不分频 */
-    TIM4->PSC = 0;
-    /* 3.2 自动重装载寄存器的配置 */
-    TIM4->ARR = 7199;
-    /* 3.3 计数器的计数方向 0=向上 1=向下*/
-    //  &= ~ &= ~ (位清除操作): 这一行代码通过“与非”逻辑将 DIR 位清零。 这意味着计数器将以向上计数的方式工作。
-    TIM4->CR1 &= ~TIM_CR1_DIR;
-
-/* Channel/Feature */
-/* 4. pwm CH3相关配置 */
-    /* 4.1 配置通道3的占空比 */
-    TIM4->CCR3 = 0;
-    /* 4.2 把通道3配置为输出  CCMR2_CC3S=00 输出*/
-    TIM4->CCMR2 &= ~TIM_CCMR2_CC3S;
-    /* 4.3 配置通道的输出比较模式 CCMR2_OC3M=110，pwm模式1*/
-    TIM4->CCMR2 &= ~TIM_CCMR2_OC3M_0;
-    TIM4->CCMR2 |= TIM_CCMR2_OC3M_1;
-    TIM4->CCMR2 |= TIM_CCMR2_OC3M_2;
-    /* 4.4 使能通道3  CCER_CC3E=1 */
-    TIM4->CCER |= TIM_CCER_CC3E;
-    /* 4.5 设置通道的极性 0=高电平有效  1=低电平有效 */
-    TIM4->CCER &= ~TIM_CCER_CC3P;
-
-/* 5 CH4的相关配置 */
-    /* 5.1 配置通道4的占空比 */
-    TIM4->CCR4 = 0;
-    /* 5.2 把通道4配置为输出  CCMR2_CC4S=00 输出*/
-    TIM4->CCMR2 &= ~TIM_CCMR2_CC4S;
-    /* 5.3 配置通道的输出比较模式 CCMR2_OC4M=110，pwm模式1*/
-    TIM4->CCMR2 |= TIM_CCMR2_OC4M_2;
-    TIM4->CCMR2 |= TIM_CCMR2_OC4M_1;
-    TIM4->CCMR2 &= ~TIM_CCMR2_OC4M_0;
-    /* 5.4 使能通道4  CCER_CC4E=1 */
-    TIM4->CCER |= TIM_CCER_CC4E;
-    /* 5.5 设置通道的极性 0=高电平有效  1=低电平有效 */
-    TIM4->CCER &= ~TIM_CCER_CC4P;
-
-/* Link */
-/* IRQ */
-/* DMA */
-
-/* Start */ 
-/* 6 使能定时器计数器 */
-    TIM4->CR1 |= TIM_CR1_CEN;
+    if (v < lo) return lo;
+    if (v > hi) return hi;
+    return v;
 }
 
+static inline uint8_t deadtime_dtg_from_ns(uint32_t deadtime_ns)
+{
+    // 简化：只用 DTG=0..127 的线性段（够用就好）
+    // ticks ~= deadtime / (1/TIM1_CLK_HZ) = deadtime_ns * TIM1_CLK_HZ / 1e9
+    uint32_t ticks = (deadtime_ns * (uint64_t)TIM1_CLK_HZ + 999999999ull) / 1000000000ull;
+    if (ticks > 127u) ticks = 127u;
+    return (uint8_t)ticks;
+}
+
+void Dri_TIM1_SetDutyPermille(uint16_t d1, uint16_t d2, uint16_t d3)
+{
+    d1 = clamp_u16(d1, 0, 1000);
+    d2 = clamp_u16(d2, 0, 1000);
+    d3 = clamp_u16(d3, 0, 1000);
+
+    uint16_t arr = (uint16_t)TIM1->ARR;
+
+    TIM1->CCR1 = (uint16_t)(((uint32_t)(arr + 1u) * d1) / 1000u);
+    TIM1->CCR2 = (uint16_t)(((uint32_t)(arr + 1u) * d2) / 1000u);
+    TIM1->CCR3 = (uint16_t)(((uint32_t)(arr + 1u) * d3) / 1000u);
+}
 
 /**
- * @brief 定时器2,3编码器模式初始化
+ * @description: TIM1初始化，pwm模式（三相互补）
  * @return {*}
  */
-void Dri_TIM_Encoder(void)
+void Dri_TIM1_Init(void)
 {
     // 1. **Clock**：RCC 使能 + 选择时钟源/分频
-    // 开启 GPIOB\GPIOA 时钟
-    RCC->APB2ENR |= RCC_APB2ENR_IOPBEN; 
-    RCC->APB2ENR |= RCC_APB2ENR_IOPAEN;
-
-    // 开启定时器2和3的时钟源
-    RCC->APB1ENR |= RCC_APB1ENR_TIM2EN ;
-    RCC->APB1ENR |= RCC_APB1ENR_TIM3EN ;
-
-    // 开启  AFIO 时钟
-    RCC->APB2ENR |= RCC_APB2ENR_AFIOEN;
+    RCC->APB2ENR |= RCC_APB2ENR_TIM1EN;
+    RCC->APB2ENR |= RCC_APB2ENR_IOPAEN;   // PA8/9/10
+    RCC->APB2ENR |= RCC_APB2ENR_IOPBEN;   // PB13/14/15
+    // RCC->APB2ENR |= RCC_APB2ENR_AFIOEN; // ❌不 remap 不需要
 
     // 2. **Pinmux/Route**：GPIO/AF/重映射/路由矩阵
-    // 关闭 JTAG，保留SWD开启，释放 PB3\PB4\PB5 作为普通 IO 使用 ，SWJ_CFG = 010
-    AFIO->MAPR &= ~AFIO_MAPR_SWJ_CFG_2;
-    AFIO->MAPR |= AFIO_MAPR_SWJ_CFG_1;
-    AFIO->MAPR &= ~AFIO_MAPR_SWJ_CFG_0;
+    // 默认映射：CH1/2/3=PA8/9/10；CH1N/2N/3N=PB13/14/15
+    // 配置为 AF Push-Pull 50MHz（CNF=10, MODE=11）
+    GPIOA->CRH &= ~(
+        GPIO_CRH_MODE8 | GPIO_CRH_CNF8 |
+        GPIO_CRH_MODE9 | GPIO_CRH_CNF9 |
+        GPIO_CRH_MODE10| GPIO_CRH_CNF10
+    );
+    GPIOA->CRH |= (
+        (GPIO_CRH_MODE8_0  | GPIO_CRH_MODE8_1  | GPIO_CRH_CNF8_1)  |
+        (GPIO_CRH_MODE9_0  | GPIO_CRH_MODE9_1  | GPIO_CRH_CNF9_1)  |
+        (GPIO_CRH_MODE10_0 | GPIO_CRH_MODE10_1 | GPIO_CRH_CNF10_1)
+    );
 
-    // 设置 GPIOB PB3\PB4\PB5，GPIOA PA15 为浮空输入 mode=00,cnf=01
-    GPIOB->CRL &= ~GPIO_CRL_MODE3;  // 00 输入模式
-    GPIOB->CRL &= ~GPIO_CRL_CNF3_0; 
-    GPIOB->CRL |= GPIO_CRL_CNF3_1;  // 01 浮空输入
-
-    GPIOB->CRL &= ~GPIO_CRL_MODE4;
-    GPIOB->CRL &= ~GPIO_CRL_CNF4_0;
-    GPIOB->CRL |= GPIO_CRL_CNF4_1;
-
-    GPIOB->CRL &= ~GPIO_CRL_MODE5;
-    GPIOB->CRL &= ~GPIO_CRL_CNF5_0;
-    GPIOB->CRL |= GPIO_CRL_CNF5_1;
-
-    GPIOA->CRH &= ~GPIO_CRH_MODE15;
-    GPIOA->CRH &= ~GPIO_CRH_MODE15_0;  
-    GPIOA->CRH |= GPIO_CRH_CNF15_1;
-
-    // PB3\PB4\PB5\PA15 作为定时器2和3的通道输入
-    AFIO->MAPR |= AFIO_MAPR_TIM2_REMAP_1; // TIM2 完全重映射，AFIO_MAPR_TIM2 = 010
-    AFIO->MAPR |= AFIO_MAPR_TIM3_REMAP_1;   // TIM3 部分重映射，AFIO_MAPR_TIM3 = 10
-
+    GPIOB->CRH &= ~(
+        GPIO_CRH_MODE13 | GPIO_CRH_CNF13 |
+        GPIO_CRH_MODE14 | GPIO_CRH_CNF14 |
+        GPIO_CRH_MODE15 | GPIO_CRH_CNF15
+    );
+    GPIOB->CRH |= (
+        (GPIO_CRH_MODE13_0 | GPIO_CRH_MODE13_1 | GPIO_CRH_CNF13_1) |
+        (GPIO_CRH_MODE14_0 | GPIO_CRH_MODE14_1 | GPIO_CRH_CNF14_1) |
+        (GPIO_CRH_MODE15_0 | GPIO_CRH_MODE15_1 | GPIO_CRH_CNF15_1)
+    );
 
     // 3. **CoreConfig**：外设核心参数（波特率、分辨率、模式）
+    // 先停表
+    TIM1->CR1 &= ~TIM_CR1_CEN;
 
-    TIM2->PSC = 0;               // 预分频器不分频
-    TIM2->ARR = 65535 - 1;          // 自动重装载寄存器周期 1000
-    TIM3->PSC = 0;
-    TIM3->ARR = 65535 - 1;
+    // 中心对齐（更适合电机/互补 PWM）：CMS=01，ARR 预装载
+    TIM1->CR1 &= ~(TIM_CR1_DIR | TIM_CR1_CMS | TIM_CR1_CKD);
+    TIM1->CR1 |=  TIM_CR1_CMS_0;     // Center-aligned mode 1
+    TIM1->CR1 |=  TIM_CR1_ARPE;      // ARR preload
+
+    // PWM 频率：中心对齐 f = TIMclk / (2*(PSC+1)*(ARR+1))
+    uint16_t psc = 0;
+    uint32_t arr = (TIM1_CLK_HZ / (2u * (uint32_t)PWM_FREQ_HZ * (psc + 1u))) - 1u;
+
+    TIM1->PSC = psc;
+    TIM1->ARR = (uint16_t)arr;
 
     // 4. **Channel/Feature**：通道/功能块（多路、FIFO、滤波、触发源）
-    // 编码器模式设置
-    // 定时器2
-    // 通道1
-    TIM2->CCMR1 |= TIM_CCMR1_CC1S_0;  // 定时器2 通道1  01
-    TIM2->CCMR1 &= ~TIM_CCMR1_CC1S_1;
+    // PWM1 + CCR 预装载：OCxM=110，OCxPE=1
+    TIM1->CCMR1 = 0;
+    TIM1->CCMR2 = 0;
 
-    // 通道2
-    TIM2->CCMR1 |= TIM_CCMR1_CC2S_0;   // 定时器2 通道2  01 
-    TIM2->CCMR1 &= ~TIM_CCMR1_CC2S_1;
+    // 4. **Channel/Feature**：通道/功能块（多路、FIFO、滤波、触发源）
+    // PWM1: OCxM = 110 -> OCxM_2 | OCxM_1；再开预装载 OCxPE
 
-    TIM2->CCMR1 |= TIM_CCMR1_CC1S;
-    TIM2->CCER &= ~TIM_CCER_CC2P;   // 定时器2 通道1 不反相
+    // ---- CH1 ----
+    TIM1->CCMR1 &= ~(TIM_CCMR1_OC1M);  // 清 OC1M[2:0]
+    TIM1->CCMR1 |=  (TIM_CCMR1_OC1M_2 | TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1PE);
 
-    // 开启CH1,CH2输入捕获 不反相 
-    TIM2->CCER |= TIM_CCER_CC1P;
-    TIM2->CCER |= TIM_CCER_CC1E;
+    // ---- CH2 ----
+    TIM1->CCMR1 &= ~(TIM_CCMR1_OC2M);  // 清 OC2M[2:0]
+    TIM1->CCMR1 |=  (TIM_CCMR1_OC2M_2 | TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2PE);
 
-    TIM2->CCER |= TIM_CCER_CC2P;
-    TIM2->CCER |= TIM_CCER_CC2E;
-    //双边沿计数模式 TIM_SMCR_SMS_0 = 011
-    TIM2->SMCR |= TIM_SMCR_SMS_0;
-    TIM2->SMCR |= TIM_SMCR_SMS_1;
-    TIM2->SMCR &= ~TIM_SMCR_SMS_2;
+    // ---- CH3 ----
+    TIM1->CCMR2 &= ~(TIM_CCMR2_OC3M);  // 清 OC3M[2:0]
+    TIM1->CCMR2 |=  (TIM_CCMR2_OC3M_2 | TIM_CCMR2_OC3M_1 | TIM_CCMR2_OC3PE);
 
-    // 定时器3
-    // 通道1
-    TIM3->CCMR1 &= ~TIM_CCMR1_CC2S_0;   // 定时器3 通道2 选择编码器模式2
-    TIM3->CCMR1 |= TIM_CCMR1_CC2S_1;
 
-    // 通道2
-    TIM3->CCMR1 &= ~TIM_CCMR1_CC1S_0;  // 定时器3 通道1 选择编码器模式2
-    TIM3->CCMR1 |= TIM_CCMR1_CC1S_1;
-    TIM3->CCER &= ~TIM_CCER_CC2P;   // 定时器3 通道2 不反相
+    // 初始占空比（千分比）
+    Dri_TIM1_SetDutyPermille(DUTY_PERMILLE, DUTY_PERMILLE, DUTY_PERMILLE);
 
-    // 开启CH1,CH2输入捕获 不反相
-    TIM3->CCER |= TIM_CCER_CC1P;
-    TIM3->CCER |= TIM_CCER_CC2E;
-    //双边沿计数模式 TIM_SMCR_SMS_0 = 011
-    TIM3->SMCR |= TIM_SMCR_SMS_0;
-    TIM3->SMCR |= TIM_SMCR_SMS_1;
-    TIM3->SMCR &= ~TIM_SMCR_SMS_2;
-    
+    // 使能输出：主通道 + 互补通道
+    // CCxE=1, CCxNE=1（极性默认高有效，需要反相再配 CCxP/CCxNP）
+    TIM1->CCER = 0;
+    TIM1->CCER |= TIM_CCER_CC1E  | TIM_CCER_CC1NE;
+    TIM1->CCER |= TIM_CCER_CC2E  | TIM_CCER_CC2NE;
+    TIM1->CCER |= TIM_CCER_CC3E  | TIM_CCER_CC3NE;
 
     // 5. **Link**：与其它外设联动（触发/同步/路由/跨外设连接）
-    // 6. **IRQ**：中断使能、清标志、NVIC、优先级
-    // 7. **DMA**：DMA 请求、通道映射、burst/循环
-    // 8. **Start**：启动顺序、清标志、使能输出/收发
-    TIM2->CR1 |= TIM_CR1_CEN;   // 使能定时器2
-    TIM3->CR1 |= TIM_CR1_CEN;   // 使能定时器3
-}
+    // 本例不做触发同步（需要 TRGO/从模式再加）
 
+    // 6. **IRQ**：中断使能、清标志、NVIC、优先级
+    // 本例不启用中断
+
+    // 7. **DMA**：DMA 请求、通道映射、burst/循环
+    // 本例不启用 DMA
+
+    // 8. **Start**：启动顺序、清标志、使能输出/收发
+    // 死区 + MOE（高级定时器必须开 MOE，否则没波形）
+    uint8_t dtg = deadtime_dtg_from_ns(DEADTIME_NS);
+
+    TIM1->BDTR = 0;
+    TIM1->BDTR |= (uint32_t)dtg;       // DTG[7:0]
+    TIM1->BDTR |= TIM_BDTR_MOE;        // 主输出使能 🔥
+
+    // 强制更新：把预装载的 PSC/ARR/CCR “拍板生效”
+    TIM1->EGR = TIM_EGR_UG;
+
+    // 启动
+    TIM1->CR1 |= TIM_CR1_CEN;
+}
