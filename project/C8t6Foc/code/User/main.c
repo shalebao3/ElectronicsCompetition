@@ -1,35 +1,52 @@
 #include "main.h"
 #include "Driver_USART.h"
+#include "COMMON_ANTIPARK.h" // 确保包含你的算法头文件
 #include "freertos.h"
 #include "task.h"
+#include <math.h> // 必须包含数学库
 
-// 1. 定义任务函数
-void MyTask_Hello(void *pvParameters)
+// 1. 任务函数：运行反帕克变换并输出波形
+void MyTask_FOC_Antipark(void *pvParameters)
 {
+    float angle = 0.0f;          // 电角度 (弧度制 0 ~ 2*PI)
+    dq_t v_dq = {0.6f, 0.2f};    // 模拟给定的 D轴和 Q轴电压（直流分量）
+    alphabeta_t v_ab;            // 存放变换后的 Alpha/Beta 输出
+
     while (1)
     {
-        printf("Hello\r\n");
-        // 现在这里是真正的 1000ms 精准延时
-        vTaskDelay(pdMS_TO_TICKS(1000)); 
+        // A. 模拟电机旋转：角度步进（步进越小，正弦波越细腻）
+        angle += 0.05f; 
+        if (angle > 6.283185f) angle = 0.0f; // 超过 2*PI 后清零
+
+        // B. 执行反帕克变换：将 DQ 旋转坐标系 转回 Alpha/Beta 静止坐标系
+        // 公式：V_alpha = Vd*cos - Vq*sin; V_beta = Vd*sin + Vq*cos;
+        Inverse_Park_Transformation(v_dq, angle, &v_ab);
+
+        // C. 格式化输出到 VOFA+ (FireWater 协议)
+        // 格式为：数据1,数据2\n
+        printf("%.3f,%.3f\n", v_ab.alpha, v_ab.beta);
+
+        // D. 这里的延时非常关键！20ms 对应 50Hz 的波形刷新率
+        vTaskDelay(pdMS_TO_TICKS(20)); 
     }
 }
 
 int main(void)  
 {
-    // 硬件初始化
-    //SystemClock_Config_72M(); // 确保你之前写的 72M 初始化还在
+    // --- 硬件初始化 ---
+    // 系统已经由 SystemInit 自动升频至 72MHz
     Driver_USART1_Init();
 
-    // 2. 创建任务
-    // 任务函数, 任务名, 堆栈大小, 参数, 优先级, 任务句柄
-    xTaskCreate(MyTask_Hello, "HelloTask", 128, NULL, 1, NULL);
+    // --- 创建 FOC 波形显示任务 ---
+    // 注意：堆栈给 256 或 512，因为 printf 打印浮点数比较占内存
+    xTaskCreate(MyTask_FOC_Antipark, "FOC_Wave", 256, NULL, 1, NULL);
 
-    // 3. 启动调度器 (这是最关键的一步，程序运行到这里后会跳转到任务里，不再回来)
+    // --- 启动 FreeRTOS 调度器 ---
     vTaskStartScheduler();
 
-    // 如果启动成功，程序永远不会执行到这里
     while (1); 
 }
+
 
 // 你的 SysTick_Handler 保持不变，它是对的
 extern void xPortSysTickHandler(void);
