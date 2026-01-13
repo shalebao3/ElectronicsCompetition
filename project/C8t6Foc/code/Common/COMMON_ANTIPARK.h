@@ -1,7 +1,6 @@
 #ifndef __COMMON_ANTIPARK_H
 #define __COMMON_ANTIPARK_H
 
-#include "main.h"
 
 /* 1. 先定义结构体类型（必须放在最前面） */
 typedef struct {
